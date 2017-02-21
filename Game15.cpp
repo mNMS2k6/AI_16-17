@@ -7,61 +7,40 @@ struct mystruct {
     int config[MAX][MAX];
     int depth;
     int cost;
-    int posx;
-    int posy;
+    int linha;
+    int coluna;
     mystruct *next;
     mystruct *pai;
 };
 
 mystruct *Game;
 
+void swap(mystruct *teste, int x, int y){
+  int temp = teste->config[x][y];
+  teste->config[x][y] = 0;
+  teste->config[teste->linha][teste->coluna] = temp;
+  teste->linha = x;
+  teste->coluna = y;
+}
+
 void solve(char dir){
     int temp=0;
     if(dir=='w'){
-        for (int i=0; i<MAX; i++) {
-            for (int j=0; j<MAX; j++) {
-                if(Game->config[i][j]==0){
-                    temp=Game->config[i-1][j];
-                    Game->config[i-1][j]=Game->config[i][j];
-                    Game->config[i][j]=temp;
-                }
-            }
-        }
+      if(Game->coluna!=0 )
+        swap(Game,Game->linha-1,Game->coluna);
     }
-    if(dir=='s'){
-        for (int i=0; i<MAX; i++) {
-            for (int j=0; j<MAX; j++) {
-                if(Game->config[i][j]==0){
-                    temp=Game->config[i+1][j];
-                    Game->config[i+1][j]=Game->config[i][j];
-                    Game->config[i][j]=temp;
-                }
-            }
-        }
+    else if(dir=='s'){
+      if(Game->linha!=MAX-1)
+      swap(Game,Game->linha+1,Game->coluna);
+
     }
     if(dir=='a'){
-        for (int i=0; i<MAX; i++) {
-            for (int j=0; j<MAX; j++) {
-                if(Game->config[i][j]==0){
-                    temp=Game->config[i][j-1];
-                    Game->config[i][j-1]=Game->config[i][j];
-                    Game->config[i][j]=temp;
-                }
-            }
-        }
+      if(Game->coluna!=0)
+      swap(Game,Game->linha,Game->coluna-1);
     }
     if(dir=='d'){
-        for (int i=0; i<MAX; i++) {
-            for (int j=0; j<MAX; j++) {
-                if(Game->config[i][j]==0){
-                    temp=Game->config[i][j+1];
-                    cout << temp << " TEMP " << Game->config[i][j+1] <<endl;
-                    Game->config[i][j+1]=Game->config[i][j];
-                    cout << Game->config[i][j] << " segundo "<< endl;
-                    Game->config[i][j]=temp;
-                }
-            }
-        }
+      if(Game->coluna!=MAX-1)
+      swap(Game,Game->linha,Game->coluna+1);
     }
 }
 
@@ -76,8 +55,8 @@ void read(int flag){
             for(j=0;j<MAX;j++){
                 Game->config[i][j]=config1[i][j];
                 if(config1[i][j]==0) {
-                  Game->posx=i;
-                  Game->posy=j;
+                  Game->coluna=i;
+                  Game->linha=j;
                 }
             }
         }
@@ -88,8 +67,8 @@ void read(int flag){
             for(j=0;j<MAX;j++){
                 Game->config[i][j]=config1[i][j];
                 if(config1[i][j]==0) {
-                  Game->posx=i;
-                  Game->posy=j;
+                  Game->coluna=i;
+                  Game->linha=j;
                 }
             }
         }
