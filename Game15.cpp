@@ -13,30 +13,43 @@ struct mystruct {
 	int cost; //cost of node
 	int linha; // x position of 0 int
 	int coluna; // y position of 0 int
-	mystruct *next; // pointer to child
-	mystruct *pai; // pointer to parent
+	char last_direction; // save last position
+	//mystruct *next; // pointer to child
+	mystruct * parent; // pointer to parent
 };
 typedef mystruct* data;
 
 mystruct *Game; //pointer to the 1st game struct
-mystruct *GameF; //pointer to the last game struct
+mystruct * GameF; //pointer to the last game struct
+string SGameF;
 
 //hastable
 unordered_map<string, bool> table; // hastable to represent viseted nodes
+//string keychild= "";
+int mat2[MAX][MAX]; //matrix temporary called in paste
 
 //queue for BFS
 queue<data> bfs;
 
-//convertion matrix to
-string converter(mystruct *game) {
-	string key = "";
+void print(int matriz[][MAX]) {
 	for (int i = 0; i < MAX; i++) {
 		for (int j = 0; j < MAX; j++) {
-			key += game->config[i][j] + 'A';
+			cout << matriz[i][j] << " ";
+		}
+		cout << endl;
+	}
+}
+
+string converter2(int mat[][MAX]) {
+	string keychild;
+	for (int i = 0; i < MAX; i++) {
+		for (int j = 0; j < MAX; j++) {
+			keychild += mat[i][j] + 'A';
 		}
 	}
-	return key;
+	return keychild;
 }
+
 
 //completation of function solve (only assign variables)
 void swap(mystruct *teste, int x, int y) {
@@ -47,17 +60,9 @@ void swap(mystruct *teste, int x, int y) {
 	teste->coluna = y;
 }
 
-void print() {
-	for (int i = 0; i < MAX; i++) {
-		for (int j = 0; j < MAX; j++) {
-			cout << Game->config[i][j] << " ";
-		}
-		cout << endl;
-	}
-}
-
 // check if 1st board i can solve to the last board
-bool completude() {
+bool completude()
+{
 	int inv_first = 0; //number of inversions of 1st board
 	int inv_last = 0; //number of inversions of last board
 
@@ -117,64 +122,143 @@ bool completude() {
 }
 
 // change postions of 0 int to up ('w'), down('s'), left('a'), rigth('d')
-void solve(char dir, mystruct *Game) {
+mystruct* solve(char dir, mystruct *Game1) {
 	if (dir == 'w') // dir UP
-			{
-		if (Game->linha != 0) {
-			swap(Game, Game->linha - 1, Game->coluna);
-		}
-	} else if (dir == 's') // dir DOWN
-			{
-		if (Game->linha != MAX - 1)
-			swap(Game, Game->linha + 1, Game->coluna);
+	{
+			swap(Game1, Game1->linha - 1, Game1->coluna);
 	}
-	if (dir == 'a') // dir RIGTH
-			{
-		if (Game->coluna != 0)
-			swap(Game, Game->linha, Game->coluna - 1);
+	else if (dir == 's') // dir DOWN
+	{
+			swap(Game1, Game1->linha + 1, Game1->coluna);
 	}
-	if (dir == 'd') // dir LEFT
-			{
-		if (Game->coluna != MAX - 1)
-			swap(Game, Game->linha, Game->coluna + 1);
+	if (dir == 'a') // dir LEFT
+	{
+			swap(Game1, Game1->linha, Game1->coluna - 1);
 	}
+	if (dir == 'd') // dir RIGHT
+	{
+			swap(Game1, Game1->linha, Game1->coluna + 1);
+	}
+
+	return Game1;
 }
 
-bool is_Solution(mystruct * game, mystruct * final) {
-	if (converter(game).compare(converter(final)) == 0)
+bool is_Solution(string keychild) {
+	if (keychild.compare(SGameF) == 0)
 		return true;
 	else
 		return false;
 }
-/*
-data creat_childs(data tmp) {
-	if (table.find(convert(tmp)) != table.end()) //if the tmp node isn't created yet
-			{
-//
-	}
-	else {
-	}
+
+void copy(int mat1[][MAX], int mat2[][MAX])  // Faz uma copia da mat2 para a mat1
+{
+  int i, j;
+  for(i=0; i<MAX; i++)
+    for(j=0; j<MAX; j++)
+      mat1[i][j]=mat2[i][j];
 }
+
+data Add(data parent)
+{
+	data tmp;
+	tmp = (data)malloc(sizeof(struct mystruct));
+	copy(tmp->config,parent->config);
+	tmp->depth = parent->depth;
+	tmp->cost = parent->cost;
+	tmp->linha = parent->linha;
+	tmp->coluna = parent->coluna;
+	tmp->last_direction = parent->last_direction;
+	tmp->parent = parent;
+
+	return tmp;
+}
+
+
+void creat_childs(data child, string keychild, char dir)
+{
+		string inicial = converter2(Game->config);
+
+/*
+		cout << "#######################" << endl << keychild << "-creat_child.key: " << endl;
+		cout << inicial << " -inicial: " << endl;
+		cout << SGameF << " -final: " << endl;
 */
-void general_search() {
+print(child->config);
+cout << "### " << child->linha << " , " << child->coluna << endl << endl;
 
-	data tmp; //pointer to mystruct
+		if(is_Solution(keychild)) //isSolution
+	{
+			cout << " final " << endl;
+			exit(0);
+	}
 
-	bfs.push(Game); //add initial config to queu
+	if (table.find(keychild) == table.end()) //if the tmp node isn't created yet
+	{
+		child->last_direction = dir;
+
+		bfs.push(child);
+
+		// adiciona à hash
+		pair<string,bool> pare (keychild, true);
+		table.insert(pare);
+	}
+	else
+	cout << "o joao é burro" << endl;
+}
+
+void general_search(mystruct *Game1)
+{
+	bfs.push(Game1); //add initial config to queu
+
+	data parent;
 
 	// start searching for solution
-	while (!bfs.empty()) {
-
-		tmp = bfs.front(); // taking 1 node
+	while (!bfs.empty())
+	{
+		parent = bfs.back(); // taking 1 node
 		bfs.pop(); //remove the node taked from the queu
 
-		// is the node i taked is solution
-		if (is_Solution(tmp, GameF)) {
-			//return path to solution (function?)
+
+		if(parent->coluna+1 < MAX)
+		{
+				data child = Add(parent);
+
+				child = solve('d', child);
+
+				string keychild = converter2(child->config);
+
+				creat_childs(child, keychild, 'd');
+
 		}
-		//if not, then creat childs not repeated
-		else {
-			//creat childs & add to queu
+		if(parent->coluna-1 >= 0)
+		{
+				data child = Add(parent);
+
+				child = solve('a', child);
+
+				string keychild = converter2(child->config);
+
+				creat_childs(child, keychild, 'a');
+		}
+		if(parent->linha+1 < MAX)
+		{
+				data child = Add(parent);
+
+				child = solve('s', child);
+
+				string keychild = converter2(child->config);
+
+				creat_childs(child, keychild, 's');
+		}
+		if(parent->linha-1 >= 0)
+		{
+				data child = Add(parent);
+
+				child = solve('w', child);
+
+				string keychild = converter2(child->config);
+
+				creat_childs(child, keychild, 'w');
 		}
 	}
 	cout << "Solution not Founded!" << endl;
@@ -188,8 +272,8 @@ void read(int flag) {
 
 	// initial config 1
 	if (flag == 1) {
-		int config1[MAX][MAX] = { { 1, 2, 3, 4 }, { 5, 6, 8, 12 },
-				{ 13, 9, 0, 7 }, { 14, 11, 10, 15 } };
+		int config1[MAX][MAX] = { { 1, 2, 3, 4 }, { 5, 6, 0, 8},
+				{ 9, 10, 7, 11 }, { 13, 14, 15, 12 } };
 
 		// search and save 0 int postion on config board
 		for (i = 0; i < MAX; i++) {
@@ -236,13 +320,12 @@ void read(int flag) {
 			}
 		}
 	}
+	cout << "INICIAL"<< endl;
+	print(Game->config);
+	cout << "FINAL"<< endl;
+	print(GameF->config);
 
-	//decide what postion 0 goes up('w'), down('s'), left('a'), rigth('d')
-	//char dir;
-	//cin >> dir;
-	//print();
-	//solve(dir);
-	//cout << completude() << endl;
+	SGameF=converter2(GameF->config);
 
 }
 
@@ -256,7 +339,7 @@ int main()
 
 	read(flag);
 
-	general_search();
+	general_search(Game);
 	//print();
 
 	//cout << converter(Game) << endl;
