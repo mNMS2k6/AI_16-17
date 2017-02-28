@@ -23,6 +23,7 @@ typedef mystruct* data;
 mystruct *Game; //pointer to the 1st game struct
 mystruct * GameF; //pointer to the last game struct
 string SGameF; //key of the final configuration
+string::iterator sit;
 
 // hastable to represent viseted nodes
 unordered_map<string, int> table;
@@ -67,6 +68,22 @@ string converter(int mat[][MAX])
 	}
     }
   return keychild;
+}
+
+int heuristica(string key)
+{
+  int c=0;
+  for(sit=key.begin(); sit!=key.end(); sit++)
+    {
+      for(string::iterator sit2 = sit; sit2!= key.end(); sit2++)
+	{
+	  if (*sit > *sit2 && *sit2 != 'A')
+	    {
+	      c++;
+	    }
+	}
+    }
+  return c;
 }
 
 //completation of function solve (only assign variables)
@@ -514,7 +531,6 @@ void read(int flag)
       //reset limit to =0 if we go for DFS_Interative
       dfs_limit=0;
     }
-
   cout << "INICIAL" << endl;
   print(Game->config);
   cout << endl;
@@ -522,7 +538,6 @@ void read(int flag)
   cout << "FINAL" << endl;
   print(GameF->config);
   cout << endl;
-
 }
 
 int main()
@@ -537,6 +552,9 @@ int main()
 
   read(flag);
 
+  //string keyInicial = converter(Game->config);
+  //cout << "invs: " << heuristica(keyInicial) << endl;
+  
   if (flag2 == 3)
     {
       dfs_inter();
