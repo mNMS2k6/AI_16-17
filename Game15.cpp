@@ -25,7 +25,9 @@ mystruct * GameF; //pointer to the last game struct
 string SGameF; //key of the final configuration
 
 // hastable to represent viseted nodes
-unordered_map<string, bool> table;
+unordered_map<string, int> table;
+//iterator to manage hashtable
+unordered_map<string, int>:: iterator it;
 
 //matrix temporary called in paste
 int mat2[MAX][MAX];
@@ -179,6 +181,7 @@ void creat_childs(data child, string keychild, char dir)
       cout << backtrack(child) << endl;
       exit(0);
     }
+  
   else if (table.find(keychild) == table.end()) //if the tmp node isn't created yet
     {
       switch (dir)
@@ -197,10 +200,17 @@ void creat_childs(data child, string keychild, char dir)
 	  break;
 	}
 
-      // adiciona à hashtable
-      pair<string, bool> pare(keychild, true);
-      table.insert(pare);
-
+      if(flag2!=3)
+	{
+	  pair<string, int> pare(keychild, 1);
+	  table.insert(pare);
+	}
+      else
+	{
+	  pair<string, int> pare(keychild, child->depth);
+	  table.insert(pare);
+	}
+      
       if (flag2 == 1)
 	{
 	  bfs.push(child);
@@ -208,6 +218,42 @@ void creat_childs(data child, string keychild, char dir)
       else if (flag2 == 2 || flag2 == 3)
 	{
 	  dfs.push(child);
+	}
+    }
+
+  if(flag2==3)
+    {
+      if(table.find(keychild) != table.end())
+	{
+	  switch (dir)
+	    {
+	    case 'w':
+	      child->last_direction = 'U';
+	      break;
+	    case 's':
+	      child->last_direction = 'D';
+	      break;
+	    case 'a':
+	      child->last_direction = 'L';
+	      break;
+	    case 'd':
+	      child->last_direction = 'R';
+	      break;
+	    }
+
+	  it = table.find(keychild);
+
+	  //cout << "ola: " << it->second << endl;
+      
+	  if(it->second > child->depth)
+	    {
+	      table.erase(it->first);
+	  
+	      pair<string, int> pare(keychild, child->depth);
+	      table.insert(pare);
+
+	      dfs.push(child);
+	    }
 	}
     }
 }
@@ -454,7 +500,7 @@ void read(int flag)
       bfs.push(Game);
       //add initial config to hashtable
       string keyInicial = converter(Game->config);
-      pair<string, bool> pare(keyInicial, true);
+      pair<string, int> pare(keyInicial, 1);
       table.insert(pare);
     }
   else if (flag2 == 2 || flag2 == 3)
@@ -463,7 +509,7 @@ void read(int flag)
       dfs.push(Game);
       //add initial config to hashtable
       string keyInicial = converter(Game->config);
-      pair<string, bool> pare(keyInicial, true);
+      pair<string, int> pare(keyInicial, 1);
       table.insert(pare);
       //reset limit to =0 if we go for DFS_Interative
       dfs_limit=0;
