@@ -2,12 +2,14 @@
 #include <iostream>
 #include <unordered_map>
 #include <queue>
+#include <stack>
 
 using namespace std;
 
 #define MAX 4 // game board size
 
-struct mystruct {
+struct mystruct
+{
 	int config[MAX][MAX]; // game board
 	int depth; // depth of node
 	int cost; //cost of node
@@ -22,13 +24,23 @@ mystruct *Game; //pointer to the 1st game struct
 mystruct * GameF; //pointer to the last game struct
 string SGameF; //key of the final configuration
 
-//hastable saving created nodes
-unordered_map<string, bool> table; // hastable to represent viseted nodes
+// hastable to represent viseted nodes
+unordered_map<string, bool> table;
 
-int mat2[MAX][MAX]; //matrix temporary called in paste
+//matrix temporary called in paste
+int mat2[MAX][MAX];
+
+// type of search
+int flag2;
+
+//dfs_iter limiter
+int dfs_limit=0;
 
 //queue for BFS
 queue<data> bfs;
+
+//stack for dfs
+stack<data> dfs;
 
 void print(int matriz[][MAX]) {
 	for (int i = 0; i < MAX; i++) {
@@ -75,7 +87,6 @@ mystruct* solve(char dir, mystruct *Game1) {
 			{
 		swap(Game1, Game1->linha, Game1->coluna + 1);
 	}
-
 	return Game1;
 }
 
@@ -110,16 +121,12 @@ data Add(data parent) {
 }
 
 //give the path from the initial config to the last config
-string backtrack(data child)
-{
+string backtrack(data child) {
 	data tmp = child;
 	string path;
 	string p_tmp;
 
-	while (Game != tmp)
-	{
-		//cout << "----->DIR:" << tmp->last_direction << endl;
-
+	while (Game != tmp) {
 		path = tmp->last_direction;
 
 		path += p_tmp;
@@ -128,24 +135,36 @@ string backtrack(data child)
 
 		tmp = tmp->parent;
 	}
-	return path;
+	return p_tmp;
 }
 
-void creat_childs(data child, string keychild, char dir)
-{
+void creat_childs(data child, string keychild, char dir) {
 	if (is_Solution(keychild))
 	{
-
-		cout << "CONFIG FINAL:" << endl;
+		cout << "###CONFIG FINAL###" << endl;
 		print(child->config);
-		cout << endl;
-		cout << backtrack(child) << endl;
+		cout << child->depth << endl;
+		cout << "###CONFIG FINAL###" << endl << endl;
 
+		switch (dir) {
+		case 'w':
+			child->last_direction = 'U';
+			break;
+		case 's':
+			child->last_direction = 'D';
+			break;
+		case 'a':
+			child->last_direction = 'L';
+			break;
+		case 'd':
+			child->last_direction = 'R';
+			break;
+		}
+		cout << backtrack(child) << endl;
 		exit(0);
 	}
-
-	else if (table.find(keychild) == table.end()) //if the tmp node isn't created yet
-	{
+	else if(table.find(keychild) == table.end()) //if the tmp node isn't created yet
+			{
 		switch (dir)
 		{
 		case 'w':
@@ -162,92 +181,94 @@ void creat_childs(data child, string keychild, char dir)
 			break;
 		}
 
-		/*
-		 cout << " ####### ADICIONAR Á PILHA ########" << endl;
-		 print(child->config);
-		 cout << " ####### ADICIONAR Á PILHA ######## FINAL" << endl;
-		 */
-
-		bfs.push(child);
-
 		// adiciona à hashtable
 		pair<string, bool> pare(keychild, true);
 		table.insert(pare);
+
+		if (flag2 == 1)
+		{
+			bfs.push(child);
+		}
+		else if (flag2 == 2 || flag2==3)
+		{
+			dfs.push(child);
+		}
 	}
 	else
 	{
-		//cout << "--> Repeated node <---" << endl;
 	}
 }
 
 void general_search()
 {
 	// start searching for solution
-	while (!bfs.empty())
+	while (!bfs.empty() || !dfs.empty())
 	{
-		data parent = bfs.front(); // taking 1 node
-		bfs.pop(); //remove the node taked from the queu
+		//cout << dfs.size() << endl;
 
-		/*
-		cout << "######### PAI ##############" << endl;
+		data parent;
+		if (flag2 == 1)
+		{
+			parent = bfs.front(); // taking 1 node
+			bfs.pop(); //remove the node taked from the queu
+		}
+		if (flag2 == 2 || flag2==3)
+		{
+			parent = dfs.top(); // taking 1 node
+			dfs.pop(); //remove the node taked from the stack
+		}
+
+		if(parent->depth == 13)
+		{
+		cout << "--------PAI-----------" << endl;
 		print(parent->config);
-		cout << "############################" << endl;
-		 */
+		cout << "depth: " << parent->depth << endl;
+		cout << endl;
+		}
 
-		//cout << "## d" << endl;
-		if (parent->coluna + 1 < MAX) {
+		if (parent->coluna + 1 < MAX && (parent->depth + 1 <= dfs_limit || flag2!=3))
+		{
 			data child = Add(parent);
-
+			child->depth = parent->depth + 1;
 			child = solve('d', child);
-
 			string keychild = converter(child->config);
-
 			creat_childs(child, keychild, 'd');
-			//print(child->config);
 		}
 
-		//cout << "## a" << endl;
-		if (parent->coluna - 1 >= 0) {
+		if (parent->coluna - 1 >= 0 && (parent->depth + 1 <= dfs_limit || flag2!=3))
+		{
 			data child = Add(parent);
-
+			child->depth = parent->depth + 1;
 			child = solve('a', child);
-
 			string keychild = converter(child->config);
-
 			creat_childs(child, keychild, 'a');
-			//print(child->config);
 		}
 
-		//cout << "## s" << endl;
-		if (parent->linha + 1 < MAX) {
+		if (parent->linha + 1 < MAX && (parent->depth + 1 <= dfs_limit || flag2!=3))
+		{
 			data child = Add(parent);
-
+			child->depth = parent->depth + 1;
 			child = solve('s', child);
-
 			string keychild = converter(child->config);
-
 			creat_childs(child, keychild, 's');
-			//print(child->config);
 		}
 
-		//cout << "## w" << endl;
-		if (parent->linha - 1 >= 0) {
+		if (parent->linha - 1 >= 0 && (parent->depth + 1 <= dfs_limit || flag2!=3))
+		{
 			data child = Add(parent);
-
+			child->depth = parent->depth + 1;
 			child = solve('w', child);
-
 			string keychild = converter(child->config);
-
 			creat_childs(child, keychild, 'w');
-			//print(child->config);
 		}
 
 	}
 	cout << "Solution not Founded!" << endl;
 }
 
+
 // check if 1st board i can solve to the last board
-bool completude() {
+bool completude(){
 	int inv_first = 0; //number of inversions of 1st board
 	int inv_last = 0; //number of inversions of last board
 
@@ -300,10 +321,37 @@ bool completude() {
 	// 0 em linha par e inversoes impar
 	// 0 em linha impar e inversoes par
 
-	return (((Game->linha % 2 == 0 && inv_first % 2 != 0)
-			== (GameF->linha % 2 == 0 && inv_last % 2 != 0))
-			&& ((Game->linha % 2 != 0 && inv_first % 2 == 0)
-					== (GameF->linha % 2 != 0 && inv_last % 2 == 0)));
+	if ((Game->linha % 2 == 0 && inv_first % 2 != 0) == (GameF->linha % 2 != 0 && inv_last % 2 == 0))
+		return true;
+	if ((Game->linha % 2 != 0 && inv_first % 2 == 0)== (GameF->linha % 2 == 0 && inv_last % 2 != 0))
+		return true;
+	else
+		return false;
+}
+
+void dfs_inter()
+{
+	if (completude())
+	{
+		/*
+		 *
+		 *while (dfs_limit < 13)
+		{
+		*/
+			dfs_limit=13;
+
+			while (!dfs.empty())
+			{
+				dfs.pop();
+			}
+			table.clear();
+
+			dfs.push(Game);
+			Game->depth = 0;
+			general_search();
+		//}
+		cout << "Solution not foud! - DFS_iter" << endl;
+	}
 }
 
 void read(int flag) {
@@ -328,6 +376,7 @@ void read(int flag) {
 			}
 		}
 	}
+
 	// initial config 2
 	else {
 		int config2[MAX][MAX] = { { 1, 2, 3, 4 }, { 13, 6, 8, 12 },
@@ -344,12 +393,6 @@ void read(int flag) {
 			}
 		}
 	}
-
-	bfs.push(Game); //add initial config to queu
-
-	string keyInicial = converter(Game->config);
-	pair<string, bool> pare(keyInicial, true);
-	table.insert(pare);
 
 	//Final configration
 	GameF = (struct mystruct*) malloc(sizeof(struct mystruct));
@@ -369,6 +412,21 @@ void read(int flag) {
 		}
 	}
 
+	if (flag2 == 1)
+	{
+		bfs.push(Game); //add initial config to queu
+		string keyInicial = converter(Game->config);
+		pair<string, bool> pare(keyInicial, true);
+		table.insert(pare);
+	}
+	else if (flag2 == 2 || flag2==3)
+	{
+		dfs.push(Game); //add initial config to stack
+		string keyInicial = converter(Game->config);
+		pair<string, bool> pare(keyInicial, true);
+		table.insert(pare);
+	}
+
 	cout << "INICIAL" << endl;
 	print(Game->config);
 	cout << endl;
@@ -386,12 +444,18 @@ int main()
 {
 
 	// decide what initial configuration i wan't
+	cout << "Insert kind of search: 1-BFS || 2-DFS-iter" << endl;
+	cin >> flag2;
 	int flag;
+	cout << "Insert initial config: 1-w/Solution || 2-n/Solution" << endl;
 	cin >> flag;
 
 	read(flag);
 
-	general_search();
+	if (flag2 == 3)
+		dfs_inter();
+	else
+		general_search();
 
 	return 0;
 }
