@@ -6,6 +6,7 @@
 #include <vector>         // std::vector
 #include <functional>     // std::greater
 #include <cmath>
+#include <ctime>
 
 using namespace std;
 
@@ -184,10 +185,10 @@ void creat_childs(data child, string keychild, char dir)
 {
   if (is_Solution(keychild))
     {
-      cout << "###CONFIG FINAL###" << endl;
+      cout << "###FINAL CONFIG###" << endl;
       print(child->config);
-      cout << "depth: " << child->depth << endl;
-      cout << "###CONFIG FINAL###" << endl << endl;
+      cout << "###FINAL CONFIG###" << endl;
+      cout << "-->Depth: " << child->depth << endl << endl;
       
       switch (dir)
 	{
@@ -204,7 +205,7 @@ void creat_childs(data child, string keychild, char dir)
 	  child->last_direction = 'R';
 	  break;
 	}
-      cout << backtrack(child) << endl;
+      cout << "Path from the 1st config:  " << backtrack(child) << endl << endl;
       exit(0);
     }
   
@@ -442,13 +443,13 @@ void dfs_inter()
   cout << "Solution not fouded!" << endl;
 }
 
-void read(int flag)
+void read()
 {
 
   int i = 0, j = 0;
 
   Game = (struct mystruct*) malloc(sizeof(struct mystruct));
-
+  /*
   // initial config 1
   if (flag == 1)
     {
@@ -459,26 +460,32 @@ void read(int flag)
 	  { 13, 9, 0, 7},
 	  { 14, 11, 10, 15}
 	};
-      
-      // assign and save 0 int postion on config
-      for (i = 0; i < MAX; i++)
+  */
+  
+  cout << "Please, insert the first configuration:" << endl;
+  // assign and save 0 int postion on config
+  for (i = 0; i < MAX; i++)
+    {
+      for (j = 0; j < MAX; j++)
 	{
-	  for (j = 0; j < MAX; j++)
+	  int k;
+	  cin >> k;
+	  Game->config[i][j]=k; //= config1[i][j];
+	      
+	  posXY[ k ][0] = i;
+	  posXY[ k ][1] = j;
+	      
+	  if (k == 0)
 	    {
-	      Game->config[i][j] = config1[i][j];
-	      
-	      posXY[ config1[i][j] ][0] = i;
-	      posXY[ config1[i][j] ][1] = j;
-	      
-	      if (config1[i][j] == 0)
-		{
-		  Game->linha = i;
-		  Game->coluna = j;
-		}
+	      Game->linha = i;
+	      Game->coluna = j;
 	    }
 	}
     }
+  
+      //}
 
+  /*
   // initial config 2
   else
     {
@@ -508,10 +515,12 @@ void read(int flag)
 	    }
 	}
     }
+  */
   
   //Final configration struct
   GameF = (struct mystruct*) malloc(sizeof(struct mystruct));
 
+  /*
   // final config
   int config1[MAX][MAX] =
     {
@@ -520,14 +529,18 @@ void read(int flag)
       { 9, 10, 11, 12 },
       { 13, 14, 15, 0 }
     };
-
+  */
+  
+  cout << "Please, insert the final configuration:" << endl;
   // assign and save 0 int postion on config
   for (i = 0; i < MAX; i++)
     {
       for (j = 0; j < MAX; j++)
 	{
-	  GameF->config[i][j] = config1[i][j];
-	  if (config1[i][j] == 0)
+	  int k;
+	  cin >> k;
+	  GameF->config[i][j]=k; //= config1[i][j];
+	  if (k == 0)
 	    {
 	      GameF->linha = i;
 	      GameF->coluna = j;
@@ -535,6 +548,8 @@ void read(int flag)
 	}
     }
 
+  cout << endl;
+  
   // saving the key of the final config
   SGameF = converter(GameF->config);
   
@@ -563,13 +578,9 @@ void read(int flag)
       pqueu.push(Game);
     }
   
-  cout << "INICIAL" << endl;
+  cout << "###INITIAL CONFIG###" << endl;
   print(Game->config);
-  cout << endl;
-
-  cout << "FINAL" << endl;
-  print(GameF->config);
-  cout << endl;
+  cout << "###INITIAL CONFIG###" << endl << endl;
 }
 
 int main()
@@ -577,20 +588,29 @@ int main()
   //decide what initial configuration i want
   cout << "Insert kind of search: 1-BFS || 2-DFS|| 3-DFS_Interative || 4-Greedy || 5-A*" << endl;
   cin >> flag2;
-  
+
+  /*
   int flag;
   cout << "Insert initial config: 1-w/Solution || 2-n/Solution" << endl;
   cin >> flag;
+  */
   
-  read(flag);
+  read();
   
-  if (flag2 == 3)
+  if(completude())
     {
-      dfs_inter();
+      if (flag2 == 3)
+	{
+	  dfs_inter();
+	}
+      else
+	{
+	  general_search();
+	}
     }
   else
     {
-      general_search();
-    }  
+      cout << "No solution for that configurations" << endl;
+    }
   return 0;
 }

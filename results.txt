@@ -1,0 +1,23 @@
+BFS:
+RULDDLLURRDR
+real 0.02 s
+user 0.02 CPU-s
+sys 0.00 CPU-s
+
+DFS-I:
+DLLURRRULDDR
+real 0.06 s
+user 0.06 CPU-s
+sys 0.00 CPU-s
+
+Greedy:
+RULDDLLURRDR
+real 1.66 s
+user 1.62 CPU-s
+sys 0.03 CPU-s
+
+A*:
+RULDDLLURRDR
+real 0.06 s
+user 0.06 CPU-s
+sys 0.00 CPU-s
