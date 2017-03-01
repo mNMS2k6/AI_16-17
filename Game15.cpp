@@ -3,6 +3,9 @@
 #include <unordered_map>
 #include <queue>
 #include <stack>
+#include <vector>         // std::vector
+#include <functional>     // std::greater
+#include <cmath>
 
 using namespace std;
 
@@ -33,6 +36,9 @@ unordered_map<string, int>:: iterator it;
 //matrix temporary called in paste
 int mat2[MAX][MAX];
 
+//matrix to save position x and y of every num on initial config
+int posXY[(MAX*MAX)+1][2];
+
 // type of search
 int flag2;
 
@@ -44,6 +50,15 @@ queue<data> bfs;
 
 //stack for dfs
 stack<data> dfs;
+
+// how priority_queu is sorted
+auto compare = [](data left, data right)
+{
+  return (left->cost) > (right->cost);
+};
+// priority_queu for A*
+priority_queue <data, std::vector<data>, decltype(compare)> pqueu(compare);
+
 
 void print(int matriz[][MAX])
 {
@@ -70,19 +85,13 @@ string converter(int mat[][MAX])
   return keychild;
 }
 
-int heuristica(string key)
+int heuristica (int mat[][MAX])
 {
   int c=0;
-  for(sit=key.begin(); sit!=key.end(); sit++)
-    {
-      for(string::iterator sit2 = sit; sit2!= key.end(); sit2++)
-	{
-	  if (*sit > *sit2 && *sit2 != 'A')
-	    {
-	      c++;
-	    }
-	}
-    }
+  for(int i=0; i< MAX; i++)
+    for(int j=0; j<MAX; j++)
+      if(posXY[mat[i][j]][0] != i || posXY[mat[i][j]][1] != j)
+	c += abs(i - posXY[mat[i][j]][0]) + abs(j - posXY[mat[i][j]][1]);
   return c;
 }
 
@@ -179,7 +188,7 @@ void creat_childs(data child, string keychild, char dir)
       print(child->config);
       cout << "depth: " << child->depth << endl;
       cout << "###CONFIG FINAL###" << endl << endl;
-
+      
       switch (dir)
 	{
 	case 'w':
@@ -216,7 +225,17 @@ void creat_childs(data child, string keychild, char dir)
 	  child->last_direction = 'R';
 	  break;
 	}
-
+      if( flag2==5)
+	{
+	  child->cost = heuristica(child->config) + child->depth;
+	  pqueu.push(child);
+	}
+      if(flag2==4)
+	{
+	  //cout << "heuristica: " << heuristica(child->config) << endl;
+	  child->cost = heuristica(child->config);
+	  pqueu.push(child);
+	}    
       if(flag2!=3)
 	{
 	  pair<string, int> pare(keychild, 1);
@@ -227,7 +246,6 @@ void creat_childs(data child, string keychild, char dir)
 	  pair<string, int> pare(keychild, child->depth);
 	  table.insert(pare);
 	}
-      
       if (flag2 == 1)
 	{
 	  bfs.push(child);
@@ -257,11 +275,7 @@ void creat_childs(data child, string keychild, char dir)
 	      child->last_direction = 'R';
 	      break;
 	    }
-
 	  it = table.find(keychild);
-
-	  //cout << "ola: " << it->second << endl;
-      
 	  if(it->second > child->depth)
 	    {
 	      table.erase(it->first);
@@ -278,10 +292,10 @@ void creat_childs(data child, string keychild, char dir)
 void general_search()
 {
   // start searching for solution
-  while (!bfs.empty() || !dfs.empty())
+  while (!bfs.empty() || !dfs.empty() || !pqueu.empty())
     {
       data parent;
-
+      
       if (flag2 == 1)
 	{
 	  parent = bfs.front(); // taking 1 node
@@ -292,6 +306,11 @@ void general_search()
 	  parent = dfs.top(); // taking 1 node
 	  dfs.pop(); //remove the node taked from the stack
 	}
+      if(flag2==4 || flag2==5)
+	{
+	  parent = pqueu.top();
+	  pqueu.pop();
+	}
 
       if (parent->coluna+1 < MAX && (parent->depth+1 <= dfs_limit || flag2 != 3) )
 	{
@@ -301,7 +320,7 @@ void general_search()
 	  string keychild = converter(child->config);
 	  creat_childs(child, keychild, 'd');
 	}
-
+      
       if (parent->coluna-1 >= 0 && (parent->depth+1 <= dfs_limit || flag2 != 3) )
 	{
 	  data child = Add(parent);
@@ -310,7 +329,7 @@ void general_search()
 	  string keychild = converter(child->config);
 	  creat_childs(child, keychild, 'a');
 	}
-
+      
       if (parent->linha+1 < MAX && (parent->depth+1 <= dfs_limit || flag2 != 3) )
 	{
 	  data child = Add(parent);
@@ -447,6 +466,10 @@ void read(int flag)
 	  for (j = 0; j < MAX; j++)
 	    {
 	      Game->config[i][j] = config1[i][j];
+	      
+	      posXY[ config1[i][j] ][0] = i;
+	      posXY[ config1[i][j] ][1] = j;
+	      
 	      if (config1[i][j] == 0)
 		{
 		  Game->linha = i;
@@ -473,6 +496,10 @@ void read(int flag)
 	  for (j = 0; j < MAX; j++)
 	    {
 	      Game->config[i][j] = config2[i][j];
+	      
+	      posXY[ config2[i][j] ][0] = i;
+	      posXY[ config2[i][j] ][1] = j;
+	      
 	      if (config2[i][j] == 0)
 		{
 		  Game->linha = i;
@@ -481,7 +508,7 @@ void read(int flag)
 	    }
 	}
     }
-
+  
   //Final configration struct
   GameF = (struct mystruct*) malloc(sizeof(struct mystruct));
 
@@ -531,6 +558,11 @@ void read(int flag)
       //reset limit to =0 if we go for DFS_Interative
       dfs_limit=0;
     }
+  else if(flag2==4 || flag2 == 5)
+    {
+      pqueu.push(Game);
+    }
+  
   cout << "INICIAL" << endl;
   print(Game->config);
   cout << endl;
@@ -542,18 +574,15 @@ void read(int flag)
 
 int main()
 {
-  // decide what initial configuration i wan't
-  cout << "Insert kind of search: 1-BFS || 2-DFS|| 3-DFS_Interative" << endl;
+  //decide what initial configuration i want
+  cout << "Insert kind of search: 1-BFS || 2-DFS|| 3-DFS_Interative || 4-Greedy || 5-A*" << endl;
   cin >> flag2;
-
+  
   int flag;
   cout << "Insert initial config: 1-w/Solution || 2-n/Solution" << endl;
   cin >> flag;
-
+  
   read(flag);
-
-  //string keyInicial = converter(Game->config);
-  //cout << "invs: " << heuristica(keyInicial) << endl;
   
   if (flag2 == 3)
     {
@@ -562,7 +591,6 @@ int main()
   else
     {
       general_search();
-    }
-  
+    }  
   return 0;
 }
