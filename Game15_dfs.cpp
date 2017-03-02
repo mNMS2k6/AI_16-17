@@ -186,7 +186,7 @@ string backtrack(data child)
   return p_tmp;
 }
 
-void creat_childs(data child, string keychild, char dir)
+bool creat_childs(data child, string keychild, char dir)
 {
   if (is_Solution(keychild))
     {
@@ -213,7 +213,7 @@ void creat_childs(data child, string keychild, char dir)
       
       cout << "Path from the 1st config:  " << backtrack(child) << endl << endl;
 
-      cout << "num of nodes: " << table.size() << endl << endl;
+      //cout << "num of nodes: " << table.size() << endl << endl;
       
       //print the time execution
       tf = clock();
@@ -267,12 +267,15 @@ void creat_childs(data child, string keychild, char dir)
 	{
 	  pair<string, int> pare(keychild, child->cost);
 	  table.insert(pare);
+	  return true;
 	}
       else
 	{
 	  pair<string, int> pare(keychild, child->depth);
 	  table.insert(pare);
+	        return true;
 	}
+      return false;
     }
   else if(table.find(keychild) != table.end())
     {
@@ -300,7 +303,12 @@ void creat_childs(data child, string keychild, char dir)
 	      pair<string, int> pare(keychild, child->depth);
 	      table.insert(pare);
 	      dfs.push(child);
+	      return true;
 	    }
+	}
+      else
+	{
+	  return false;
 	}
     }
 }
@@ -327,14 +335,25 @@ void general_search()
 	  parent = pqueu.top();
 	  pqueu.pop();
 	}
+      bool child_created;
+      int count_node=0;
 
+      //cout << "counrt: " << count_node << endl;
+      
       if (parent->linha-1 >= 0 && (parent->depth+1 <= dfs_limit || flag2 != 3) )
 	{
 	  data child = Add(parent);
 	  child->depth = parent->depth+1;
 	  child = solve('w', child);
 	  string keychild = converter(child->config);
-	  creat_childs(child, keychild, 'w');
+	  child_created = creat_childs(child, keychild, 'w');
+	  if (child_created)
+	    count_node++;
+	  else
+	    {
+	      free (child);
+	    }
+	    
 	}
       
       if (parent->linha+1 < MAX && (parent->depth+1 <= dfs_limit || flag2 != 3) )
@@ -343,7 +362,13 @@ void general_search()
 	  child->depth = parent->depth+1;
 	  child = solve('s', child);
 	  string keychild = converter(child->config);
-	  creat_childs(child, keychild, 's');
+	  child_created = creat_childs(child, keychild, 's');
+	  if (child_created)
+	    count_node++;
+	  else
+	    {
+	      free (child);
+	    }
 	}
 
       if (parent->coluna-1 >= 0 && (parent->depth+1 <= dfs_limit || flag2 != 3) )
@@ -352,7 +377,13 @@ void general_search()
 	  child->depth = parent->depth+1;
 	  child = solve('a', child);
 	  string keychild = converter(child->config);
-	  creat_childs(child, keychild, 'a');
+	  child_created = creat_childs(child, keychild, 'a');
+	  if (child_created)
+	    count_node++;
+	  else
+	    {
+	      free (child);
+	    }
 	}
       
       if (parent->coluna+1 < MAX && (parent->depth+1 <= dfs_limit || flag2 != 3) )
@@ -361,8 +392,18 @@ void general_search()
 	  child->depth = parent->depth+1;
 	  child = solve('d', child);
 	  string keychild = converter(child->config);
-	  creat_childs(child, keychild, 'd');
+	  child_created = creat_childs(child, keychild, 'd');
+	  if (child_created)
+	    count_node++;
+	  else
+	    {
+	      free (child);
+	      count_node =0;
+	    }
+	  
 	}
+      if (count_node == 0)
+	free (parent);      
       else if (flag2 == 2)
 	{
 	  free (parent);
@@ -432,20 +473,16 @@ bool completude()
 	}
     }
 
-  /*
-  cout << "Game->linha: " << (MAX-1)-Game->linha << endl;
+  cout << "Game->linha: " << Game->linha << endl;
   cout << "inv_first: " << inv_first << endl;
-  cout << "Gamef->linha: " << (MAX-1)-GameF->linha << endl;
+  cout << "Gamef->linha: " << GameF->linha << endl;
   cout << "inv_last: " << inv_last << endl << endl;
-  */
-  // 0 in even row & no. of inversions odd OR 0 in odd row & no. of inversions even
-  if ( (Game->linha%2==0 == inv_first%2!=0) && (GameF->linha%2==0 == inv_last%2 != 0) )
-    return true;
-  else if ( (Game->linha%2!=0 && inv_first%2==0) && (GameF->linha%2!=0 && inv_last%2==0) )
-    return true;
   
- else
-   return false;
+  // 0 in even row & no. of inversions odd OR 0 in odd row & no. of inversions even
+  if ((( (MAX-1) - Game->linha%2 == 0 && inv_first%2 != 0) == ( (MAX-1) - GameF->linha%2 == 0 && inv_last%2 != 0)) || (( (MAX-1) - Game->linha%2 != 0 && inv_first%2 == 0) == ( (MAX-1) - GameF->linha%2 != 0 && inv_last%2 == 0)) )
+    return true;
+  else
+    return false;
 }
 
 void dfs_inter()

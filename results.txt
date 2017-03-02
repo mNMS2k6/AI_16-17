@@ -1,23 +1,23 @@
 BFS:
-RULDDLLURRDR
-real 0.02 s
-user 0.02 CPU-s
-sys 0.00 CPU-s
+Depth: 12
+Path from the 1st config:  DLLURRRULDDR
+num of nodes: 17888
+time execution: 0.022914 seconds
 
-DFS-I:
-DLLURRRULDDR
-real 0.06 s
-user 0.06 CPU-s
-sys 0.00 CPU-s
+DFS_Iterative:
+Depth: 12
+Path from the 1st config:  RULDDLLURRDR
+num of nodes: 3741
+time execution: 0.040595 seconds
 
 Greedy:
-RULDDLLURRDR
-real 1.66 s
-user 1.62 CPU-s
-sys 0.03 CPU-s
+Depth: 12
+Path from the 1st config:  RULDDLLURRDR
+num of nodes: 42
+time execution: 0.000318 seconds
 
 A*:
-RULDDLLURRDR
-real 0.06 s
-user 0.06 CPU-s
-sys 0.00 CPU-s
+Depth: 12
+Path from the 1st config:  DLLURRRULDDR
+num of nodes: 57
+time execution: 0.000333 seconds
