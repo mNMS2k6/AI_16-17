@@ -161,7 +161,7 @@ data Add(data parent)
   tmp->coluna = parent->coluna;
   tmp->last_direction = parent->last_direction;
   tmp->parent = parent;
-
+  
   return tmp;
 }
 
@@ -171,22 +171,21 @@ string backtrack(data child)
   data tmp = child;
   string path;
   string p_tmp;
-  
+
   while (Game != tmp)
     {
       path = tmp->last_direction;
       
       path += p_tmp;
-
+      
       p_tmp = path;
       
       tmp = tmp->parent;
-
-    }
+    }    
   return p_tmp;
 }
 
-bool creat_childs(data child, string keychild, char dir)
+void creat_childs(data child, string keychild, char dir)
 {
   if (is_Solution(keychild))
     {
@@ -213,7 +212,7 @@ bool creat_childs(data child, string keychild, char dir)
       
       cout << "Path from the 1st config:  " << backtrack(child) << endl << endl;
 
-      //cout << "num of nodes: " << table.size() << endl << endl;
+      cout << "num of nodes: " << table.size() << endl << endl;
       
       //print the time execution
       tf = clock();
@@ -267,15 +266,12 @@ bool creat_childs(data child, string keychild, char dir)
 	{
 	  pair<string, int> pare(keychild, child->cost);
 	  table.insert(pare);
-	  return true;
 	}
       else
 	{
 	  pair<string, int> pare(keychild, child->depth);
 	  table.insert(pare);
-	        return true;
 	}
-      return false;
     }
   else if(table.find(keychild) != table.end())
     {
@@ -303,12 +299,7 @@ bool creat_childs(data child, string keychild, char dir)
 	      pair<string, int> pare(keychild, child->depth);
 	      table.insert(pare);
 	      dfs.push(child);
-	      return true;
 	    }
-	}
-      else
-	{
-	  return false;
 	}
     }
 }
@@ -335,25 +326,14 @@ void general_search()
 	  parent = pqueu.top();
 	  pqueu.pop();
 	}
-      bool child_created;
-      int count_node=0;
 
-      //cout << "counrt: " << count_node << endl;
-      
       if (parent->linha-1 >= 0 && (parent->depth+1 <= dfs_limit || flag2 != 3) )
 	{
 	  data child = Add(parent);
 	  child->depth = parent->depth+1;
 	  child = solve('w', child);
 	  string keychild = converter(child->config);
-	  child_created = creat_childs(child, keychild, 'w');
-	  if (child_created)
-	    count_node++;
-	  else
-	    {
-	      free (child);
-	    }
-	    
+	  creat_childs(child, keychild, 'w');
 	}
       
       if (parent->linha+1 < MAX && (parent->depth+1 <= dfs_limit || flag2 != 3) )
@@ -362,13 +342,7 @@ void general_search()
 	  child->depth = parent->depth+1;
 	  child = solve('s', child);
 	  string keychild = converter(child->config);
-	  child_created = creat_childs(child, keychild, 's');
-	  if (child_created)
-	    count_node++;
-	  else
-	    {
-	      free (child);
-	    }
+	  creat_childs(child, keychild, 's');
 	}
 
       if (parent->coluna-1 >= 0 && (parent->depth+1 <= dfs_limit || flag2 != 3) )
@@ -377,13 +351,7 @@ void general_search()
 	  child->depth = parent->depth+1;
 	  child = solve('a', child);
 	  string keychild = converter(child->config);
-	  child_created = creat_childs(child, keychild, 'a');
-	  if (child_created)
-	    count_node++;
-	  else
-	    {
-	      free (child);
-	    }
+	  creat_childs(child, keychild, 'a');
 	}
       
       if (parent->coluna+1 < MAX && (parent->depth+1 <= dfs_limit || flag2 != 3) )
@@ -392,18 +360,8 @@ void general_search()
 	  child->depth = parent->depth+1;
 	  child = solve('d', child);
 	  string keychild = converter(child->config);
-	  child_created = creat_childs(child, keychild, 'd');
-	  if (child_created)
-	    count_node++;
-	  else
-	    {
-	      free (child);
-	      count_node =0;
-	    }
-	  
+	  creat_childs(child, keychild, 'd');
 	}
-      if (count_node == 0)
-	free (parent);      
       else if (flag2 == 2)
 	{
 	  free (parent);
@@ -416,6 +374,103 @@ void general_search()
       double secs = double(tf-ti) / CLOCKS_PER_SEC;
       cout << "time execution: "<< secs << " seconds" << endl << endl;
     }
+}
+
+void general_search_2(data parent, char dir)
+{
+  if (is_Solution(converter(parent->config)))
+    {
+      switch (dir)
+	{
+	case 'w':
+	  parent->last_direction = 'U';
+	  break;
+	case 's':
+	  parent->last_direction = 'D';
+	  break;
+	case 'a':
+	  parent->last_direction = 'L';
+	  break;
+	case 'd':
+	  parent->last_direction = 'R';
+	  break;
+	}
+      
+      cout << "###FINAL CONFIG###" << endl;
+      print(parent->config);
+      cout << "###FINAL CONFIG###" << endl;
+      cout << "-->Depth: " << parent->depth << endl << endl;
+      cout << "num of nodes: " << table.size() << endl << endl;
+
+      cout << "Path from the 1st config: " << backtrack(parent) << endl << endl;
+      
+      //print the time execution
+      tf = clock();
+      double secs = double(tf-ti) / CLOCKS_PER_SEC;
+      cout << "time execution: "<< secs << " seconds" << endl << endl;
+      
+      exit(0);
+    }
+  
+  if(table.find(converter(parent->config)) == table.end())
+    {
+      
+      print(parent->config);
+      cout << "nó: " << converter(parent->config) << endl;
+      cout << endl;
+      
+      pair<string, int> pare(converter(parent->config), parent->depth);
+      table.insert(pare);
+
+      switch (dir)
+	{
+	case 'w':
+	  parent->last_direction = 'U';
+	  break;
+	case 's':
+	  parent->last_direction = 'D';
+	  break;
+	case 'a':
+	  parent->last_direction = 'L';
+	  break;
+	case 'd':
+	  parent->last_direction = 'R';
+	  break;
+	}
+      
+      if (parent->linha-1>=0)
+	{
+	  data child = Add(parent);
+	  child = solve('w', child);
+	  child->depth = parent->depth +1;
+	  general_search_2(child , 'w');
+	}
+      
+      if (parent->linha+1<MAX)
+	{
+	  data child = Add(parent);
+	  child = solve('s', child);
+	  child->depth = parent->depth +1;
+	  general_search_2(child, 's');
+	}
+	  
+      if (parent->coluna-1>=0)
+	{
+	  data child = Add(parent);
+	  child = solve('a', child);
+	  child->depth = parent->depth +1;
+	  general_search_2(child, 'a');
+	}
+      
+      if (parent->coluna+1<MAX)
+	{
+	  data child = Add(parent);
+	  child = solve('d', child);
+	  child->depth = parent->depth +1;
+	  general_search_2(child, 'd');
+	}
+    }
+  //free(parent);
 }
 
 // check if 1st board i can solve to the last board
@@ -473,14 +528,19 @@ bool completude()
 	}
     }
 
-  cout << "Game->linha: " << Game->linha << endl;
-  cout << "inv_first: " << inv_first << endl;
-  cout << "Gamef->linha: " << GameF->linha << endl;
-  cout << "inv_last: " << inv_last << endl << endl;
+  /*
+    cout << "Game->linha: " << (MAX-1)-Game->linha << endl;
+    cout << "inv_first: " << inv_first << endl;
+    cout << "Gamef->linha: " << (MAX-1)-GameF->linha << endl;
+    cout << "inv_last: " << inv_last << endl << endl;
+  */
   
   // 0 in even row & no. of inversions odd OR 0 in odd row & no. of inversions even
-  if ((( (MAX-1) - Game->linha%2 == 0 && inv_first%2 != 0) == ( (MAX-1) - GameF->linha%2 == 0 && inv_last%2 != 0)) || (( (MAX-1) - Game->linha%2 != 0 && inv_first%2 == 0) == ( (MAX-1) - GameF->linha%2 != 0 && inv_last%2 == 0)) )
+  if ( (Game->linha%2==0 == inv_first%2!=0) && (GameF->linha%2==0 == inv_last%2 != 0) )
     return true;
+  else if ( (Game->linha%2!=0 && inv_first%2==0) && (GameF->linha%2!=0 && inv_last%2==0) )
+    return true;
+  
   else
     return false;
 }
@@ -574,7 +634,7 @@ void read()
       pair<string, int> pare(keyInicial, 1);
       table.insert(pare);
     }
-  else if (flag2 == 2 || flag2 == 3)
+  else if (flag2 == 3)
     {
       //add initial config to stack
       dfs.push(Game);
@@ -588,6 +648,10 @@ void read()
   else if(flag2==4 || flag2 == 5)
     {
       pqueu.push(Game);
+      //add initial config to hashtable
+      string keyInicial = converter(Game->config);
+      pair<string, int> pare(keyInicial, 1);
+      table.insert(pare);
     }
   
   cout << "###INITIAL CONFIG###" << endl;
@@ -611,6 +675,12 @@ int main()
       if (flag2 == 3)
 	{
 	  dfs_inter();
+	}
+      else if(flag2 == 2)
+	{
+	  dfs.push(Game);
+	  general_search_2(Game, 'I');
+	  cout << "Solution not Founded!" << endl;   
 	}
       else
 	{
