@@ -7,6 +7,7 @@
 #include <functional>
 #include <cmath>
 #include <ctime>
+#include <string.h>
 
 using namespace std;
 
@@ -171,7 +172,7 @@ string backtrack(data child)
   data tmp = child;
   string path;
   string p_tmp;
-  
+
   while (Game != tmp)
     {
       path = tmp->last_direction;
@@ -181,8 +182,10 @@ string backtrack(data child)
       p_tmp = path;
       
       tmp = tmp->parent;
-
+      
     }
+  int a = strlen(p_tmp);
+  cout << "a: " << a << endl;
   return p_tmp;
 }
 

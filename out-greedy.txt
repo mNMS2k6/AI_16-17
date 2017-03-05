@@ -1,0 +1,104 @@
+Greedy:
+
+###INITIAL CONFIG###
+1 2 3 4 
+13 6 8 12 
+5 9 0 7 
+14 11 10 15 
+###INITIAL CONFIG###
+
+Not Solvable
+
+time execution: 2e-05 seconds
+
+--------------------------------------------
+
+###INITIAL CONFIG###
+1 2 3 4 
+5 6 8 12 
+13 9 0 7 
+14 11 10 15 
+###INITIAL CONFIG###
+
+Solvable
+
+###FINAL CONFIG###
+1 2 3 4 
+5 6 7 8 
+9 10 11 12 
+13 14 15 0 
+###FINAL CONFIG###
+
+Depth: 12
+Path from the 1st config:  DLLURRRULDDR
+num of nodes (space used): 43
+time execution: 0.000246 seconds
+
+--------------------------------------------
+
+###INITIAL CONFIG###
+1 2 3 4 
+5 0 7 8 
+9 6 10 12 
+13 14 11 15 
+###INITIAL CONFIG###
+
+Solvable
+
+###FINAL CONFIG###
+1 2 3 4 
+5 6 7 8 
+9 10 11 12 
+13 14 15 0 
+###FINAL CONFIG###
+
+Depth: 4
+Path from the 1st config:  DRDR
+num of nodes (space used): 12
+time execution: 0.000173 seconds
+
+--------------------------------------------
+
+###INITIAL CONFIG###
+9 12 0 7 
+14 5 13 2 
+6 1 4 8 
+10 15 3 11 
+###INITIAL CONFIG###
+
+Solvable
+
+###FINAL CONFIG###
+9 5 12 7 
+14 13 0 8 
+1 3 2 4 
+6 10 15 11 
+###FINAL CONFIG###
+
+Depth: 13
+Path from the 1st config:  LDRRDLDLLURRU
+num of nodes (space used): 69
+time execution: 0.000343 seconds
+
+--------------------------------------------
+
+###INITIAL CONFIG###
+6 12 0 9 
+14 2 5 11 
+7 8 4 13 
+3 10 1 15 
+###INITIAL CONFIG###
+
+Solvable
+
+###FINAL CONFIG###
+14 6 12 9 
+7 2 5 11 
+8 4 13 15 
+3 10 1 0 
+###FINAL CONFIG###
+
+Depth: 8
+Path from the 1st config:  LLDDRRRD
+num of nodes (space used): 51
+time execution: 0.000258 seconds
